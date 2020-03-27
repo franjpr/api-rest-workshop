@@ -10,9 +10,37 @@ import {
     getCarById,
     addCar
 } from './API/carsApi.double';
-import { getAllCarsWithAxios, getCarByIdWithAxios, addCarWithAxios } from './API/carsApi';
+import { getAllCarsWithAxios, getCarByIdWithAxios, addCarWithAxios, getAllCarsWithFetch, getCarByIdWithFetch, addCarWithFetch } from './API/carsApi';
 
 document.addEventListener('DOMContentLoaded', () => {
+
+    ///////////////////////////
+    // Load data by fetch    //
+    ///////////////////////////
+    const buttonLoadCarsFetch = document.getElementById('loadcarsfetch');
+    const buttonLoadCarFetch = document.getElementById('loadcarfetch');
+    const buttonAddCarFetch = document.getElementById('addfetch');
+
+    buttonLoadCarsFetch.addEventListener('click', (event) => {
+        event.stopPropagation();
+        cleanTable('cars-table');
+        getAllCarsWithFetch().then(readBodyAsJson).then(allCarsSuccessHandlerFetch).catch(errorHandler);
+    });
+
+    buttonLoadCarFetch.addEventListener('click', (event) => {
+        event.stopPropagation();
+        const carId = retrieveCarId();
+        getCarByIdWithFetch(carId).then(readBodyAsJson).then(singleCarSuccessHandlerFetch).catch(errorHandler);
+    });
+
+    buttonAddCarFetch.addEventListener('click', (event) => {
+        event.stopPropagation();
+        event.preventDefault();
+        const car = retrieveCarForm();
+        addCarWithFetch(car).then(_ => {
+            buttonLoadCarsAxios.click();
+        });
+    });
 
     ///////////////////////////
     // Load data by axios    //
@@ -24,13 +52,13 @@ document.addEventListener('DOMContentLoaded', () => {
     buttonLoadCarsAxios.addEventListener('click', (event) => {
         event.stopPropagation();
         cleanTable('cars-table');
-        getAllCarsWithAxios().then(allCarsSuccessHandler).catch(errorHandler);
+        getAllCarsWithAxios().then(allCarsSuccessHandlerAxios).catch(errorHandler);
     });
 
     buttonLoadCarAxios.addEventListener('click', (event) => {
         event.stopPropagation();
         const carId = retrieveCarId();
-        getCarByIdWithAxios(carId).then(singleCarSuccessHandler).catch(errorHandler);
+        getCarByIdWithAxios(carId).then(singleCarSuccessHandlerAxios).catch(errorHandler);
     });
 
     buttonAddCarAxios.addEventListener('click', (event) => {
@@ -80,13 +108,24 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 
-const allCarsSuccessHandler = ({ data }) => {
+const allCarsSuccessHandlerAxios = ({ data }) => {
     addCarRows(data, 'cars-table');
 }
 
-const singleCarSuccessHandler = ({ data }) => {
+const singleCarSuccessHandlerAxios = ({ data }) => {
     populateEditCarForm(data);
 }
+
+
+const allCarsSuccessHandlerFetch = (data) => {
+    addCarRows(data, 'cars-table');
+}
+
+const singleCarSuccessHandlerFetch = (data) => {
+    populateEditCarForm(data);
+}
+
+const readBodyAsJson = (response) => response.json();
 
 const errorHandler = (err) => {
     console.warn("Error -> ", err);

@@ -13,14 +13,14 @@ const getNextAvailableId = (allCars) => {
 const getCarData = () => (
     JSON.parse(
         fs.readFileSync(
-           path.join(__dirname + dataFile) , 'utf8'
+            path.join(__dirname + dataFile), 'utf8'
         )
     )
 );
 
 const saveCarData = (data) => (
     fs.writeFile(
-        path.join(__dirname + dataFile), 
+        path.join(__dirname + dataFile),
         JSON.stringify(data, null, 4),
         (err) => {
             if (err) {
@@ -35,6 +35,7 @@ router.route('/')
         res.send(data);
     })
     .post((req, res) => {
+        console.log("req", req.body)
         const data = getCarData();
         const nextId = getNextAvailableId(data);
         const newCar = {
@@ -57,7 +58,7 @@ router.route('/:id')
             (item) => item.car_id === +req.params.id
         );
 
-        if(!matchingCar) {
+        if (!matchingCar) {
             res.sendStatus(404);
         } else {
             res.send(matchingCar);
@@ -84,7 +85,7 @@ router.route('/:id')
             (item) => item.car_id === req.params.id
         );
 
-        if(!matchingCar) {
+        if (!matchingCar) {
             res.sendStatus(404);
         } else {
             matchingCar.name = req.body.name;
