@@ -34,5 +34,17 @@
         "name": "Green Roaster",
         "brand": "HMI",
         "year_release": "1976"
+    },
+    {
+        "car_id": 62,
+        "name": "mynewcar",
+        "brand": "ynewbrand",
+        "year_release": "2891"
+    },
+    {
+        "car_id": 63,
+        "name": "ah",
+        "brand": "new",
+        "year_release": "123"
     }
 ]
