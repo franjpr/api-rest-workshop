@@ -2,9 +2,11 @@ const express = require('express');
 path = require('path'),
   cookieParser = require('cookie-parser'),
   bodyParser = require('body-parser'),
-  cors = require('cors');
+  cors = require('cors'),
+  expressjwt = require('express-jwt');
 
-const users = require('./routes/users');
+
+//const users = require('./routes/users');
 const cars = require('./routes/cars');
 
 const app = express();
@@ -15,8 +17,12 @@ app.use(bodyParser.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(cors());
 
-app.use('/api/users', users);
-app.use('/api/cars', cars);
+const jwtCheck = expressjwt({
+  secret: 'mysupersecretkey',
+});
+
+//app.use('/api/users', users);
+app.use('/api/cars', jwtCheck, cars);
 
 
 app.set('port', process.env.PORT || 3050);

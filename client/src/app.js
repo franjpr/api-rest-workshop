@@ -10,12 +10,38 @@ import {
     getCarById,
     addCar
 } from './API/carsApi.double';
-import { getAllCarsWithAxios, getCarByIdWithAxios, addCarWithAxios, getAllCarsWithFetch, getCarByIdWithFetch, addCarWithFetch } from './API/carsApi';
+import { getAllCarsWithAxios, getCarByIdWithAxios, addCarWithAxios, } from './API/carsApiWithAxios';
+import { getAllCarsWithFetch, getCarByIdWithFetch, addCarWithFetch } from './API/carsApiWithFetch'
+import { authenticate } from './API/authApi';
+
 
 document.addEventListener('DOMContentLoaded', () => {
 
+    let authToken = '';
+
     ///////////////////////////
-    // Load data by fetch    //
+    // Authentication        //
+    ///////////////////////////
+    const createTokenBtn = document.getElementById('createToken');
+    const clearTokenBtn = document.getElementById('clearToken');
+
+    createTokenBtn.addEventListener('click', event => {
+        const userpassword = {
+            username: 'admin',
+            password: 'admin'
+        };
+
+        authenticate(userpassword).then(({ access_token }) => {
+            authToken = access_token;
+        }).catch(console.warn)
+    });
+
+    clearTokenBtn.addEventListener('click', event => {
+        authToken = '';
+    });
+
+    ///////////////////////////
+    // Load data with fetch  //
     ///////////////////////////
     const buttonLoadCarsFetch = document.getElementById('loadcarsfetch');
     const buttonLoadCarFetch = document.getElementById('loadcarfetch');
@@ -24,26 +50,26 @@ document.addEventListener('DOMContentLoaded', () => {
     buttonLoadCarsFetch.addEventListener('click', (event) => {
         event.stopPropagation();
         cleanTable('cars-table');
-        getAllCarsWithFetch().then(readBodyAsJson).then(allCarsSuccessHandlerFetch).catch(errorHandler);
+        getAllCarsWithFetch(authToken).then(readBodyAsJson).then(allCarsSuccessHandlerFetch).catch(errorHandler);
     });
 
     buttonLoadCarFetch.addEventListener('click', (event) => {
         event.stopPropagation();
         const carId = retrieveCarId();
-        getCarByIdWithFetch(carId).then(readBodyAsJson).then(singleCarSuccessHandlerFetch).catch(errorHandler);
+        getCarByIdWithFetch(carId, authToken).then(readBodyAsJson).then(singleCarSuccessHandlerFetch).catch(errorHandler);
     });
 
     buttonAddCarFetch.addEventListener('click', (event) => {
         event.stopPropagation();
         event.preventDefault();
         const car = retrieveCarForm();
-        addCarWithFetch(car).then(_ => {
-            buttonLoadCarsAxios.click();
+        addCarWithFetch(car, authToken).then(_ => {
+            buttonLoadCarsFetch.click();
         });
     });
 
     ///////////////////////////
-    // Load data by axios    //
+    // Load data with axios  //
     ///////////////////////////
     const buttonLoadCarsAxios = document.getElementById('loadcarsaxios');
     const buttonLoadCarAxios = document.getElementById('loadcaraxios');
@@ -52,20 +78,20 @@ document.addEventListener('DOMContentLoaded', () => {
     buttonLoadCarsAxios.addEventListener('click', (event) => {
         event.stopPropagation();
         cleanTable('cars-table');
-        getAllCarsWithAxios().then(allCarsSuccessHandlerAxios).catch(errorHandler);
+        getAllCarsWithAxios(authToken).then(allCarsSuccessHandlerAxios).catch(errorHandler);
     });
 
     buttonLoadCarAxios.addEventListener('click', (event) => {
         event.stopPropagation();
         const carId = retrieveCarId();
-        getCarByIdWithAxios(carId).then(singleCarSuccessHandlerAxios).catch(errorHandler);
+        getCarByIdWithAxios(carId, authToken).then(singleCarSuccessHandlerAxios).catch(errorHandler);
     });
 
     buttonAddCarAxios.addEventListener('click', (event) => {
         event.stopPropagation();
         event.preventDefault();
         const car = retrieveCarForm();
-        addCarWithAxios(car).then(_ => {
+        addCarWithAxios(car, authToken).then(_ => {
             buttonLoadCarsAxios.click();
         });
     });
@@ -108,6 +134,7 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 
+// Axios handlers
 const allCarsSuccessHandlerAxios = ({ data }) => {
     addCarRows(data, 'cars-table');
 }
@@ -116,7 +143,7 @@ const singleCarSuccessHandlerAxios = ({ data }) => {
     populateEditCarForm(data);
 }
 
-
+// Fetch handlers
 const allCarsSuccessHandlerFetch = (data) => {
     addCarRows(data, 'cars-table');
 }
@@ -127,7 +154,9 @@ const singleCarSuccessHandlerFetch = (data) => {
 
 const readBodyAsJson = (response) => response.json();
 
+
+// Error handler
 const errorHandler = (err) => {
-    console.warn("Error -> ", err);
+    alert(err);
     return [];
 }
